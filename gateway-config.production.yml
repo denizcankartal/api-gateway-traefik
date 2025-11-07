@@ -1,0 +1,49 @@
+# Production Gateway Configuration
+# This example shows a typical setup with frontend + API backend
+
+http:
+  routers:
+    # API Backend (higher priority - checked first)
+    api-router:
+      rule: "Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      service: api-service
+      priority: 20
+      entryPoints:
+        - websecure
+      middlewares:
+        - cloudflare-only@file  # CRITICAL: Blocks direct IP access
+      tls:
+        certResolver: letsencrypt
+
+    # Frontend (lower priority - catches everything else)
+    frontend-router:
+      rule: "Host(`${DOMAIN}`)"
+      service: frontend-service
+      priority: 10
+      entryPoints:
+        - websecure
+      middlewares:
+        - cloudflare-only@file  # CRITICAL: Blocks direct IP access
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    # API service (e.g., FastAPI, Express, Django)
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://api:80"
+        healthCheck:
+          path: /status/200
+          interval: 10s
+          timeout: 3s
+
+    # Frontend service (e.g., nginx, React, Vue)
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:80"
+        healthCheck:
+          path: /
+          interval: 30s
+          timeout: 5s

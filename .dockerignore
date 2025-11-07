@@ -1,0 +1,10 @@
+README.md
+*.md
+.git
+.gitignore
+.github
+.env
+.env.example
+docker-compose*.yml
+gateway-config*.yml
+examples/
