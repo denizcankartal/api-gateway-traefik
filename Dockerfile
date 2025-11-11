@@ -3,8 +3,8 @@ FROM traefik:v3.1
 # Install envsubst for environment variable substitution
 RUN apk add --no-cache gettext
 
-# Copy static Traefik configuration
-COPY traefik.yml /etc/traefik/traefik.yml
+# Copy static Traefik configuration template (will be processed by entrypoint.sh)
+COPY traefik.yml /etc/traefik/traefik.yml.template
 
 # Copy default middlewares
 COPY defaults.yml /etc/traefik/defaults.yml

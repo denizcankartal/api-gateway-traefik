@@ -5,6 +5,10 @@ echo "========================================="
 echo "API Gateway Starting"
 echo "========================================="
 
+# Process traefik.yml (static config) with environment variables
+echo "✓ Processing static configuration with environment variables..."
+envsubst < /etc/traefik/traefik.yml.template > /etc/traefik/traefik.yml
+
 # Check if gateway-config.yml exists
 if [ ! -f "/etc/gateway/config.yml" ]; then
     echo "ERROR: /etc/gateway/config.yml not found!"
@@ -15,7 +19,7 @@ fi
 echo "✓ Found gateway configuration at /etc/gateway/config.yml"
 
 # Substitute environment variables in gateway-config.yml
-echo "✓ Processing environment variables in configuration..."
+echo "✓ Processing environment variables in dynamic configuration..."
 envsubst < /etc/gateway/config.yml > /tmp/config-processed.yml
 
 # Convert gateway-config.yml to Traefik dynamic.yml
