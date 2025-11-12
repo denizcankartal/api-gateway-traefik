@@ -1,0 +1,21 @@
+# Routes Configuration - Local Development
+# HTTP only, no TLS, minimal middlewares
+
+http:
+  routers:
+    frontend-router:
+      rule: "Host(`localhost`)"
+      service: frontend-service
+      priority: 10
+      entryPoints:
+        - web
+
+  services:
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:80"
+        healthCheck:
+          path: /
+          interval: 30s
+          timeout: 5s

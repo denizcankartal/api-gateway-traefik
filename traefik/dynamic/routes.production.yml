@@ -1,0 +1,23 @@
+# Routes Configuration - Production
+# HTTPS with Let's Encrypt, full security stack
+
+http:
+  routers:
+    frontend-router:
+      rule: "Host(`${DOMAIN}`)"
+      service: frontend-service
+      priority: 10
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:80"
+        healthCheck:
+          path: /
+          interval: 30s
+          timeout: 5s

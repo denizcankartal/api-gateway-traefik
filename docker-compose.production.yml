@@ -1,0 +1,47 @@
+# API Gateway - Production
+# HTTPS with Let's Encrypt
+
+services:
+  api-gateway:
+    image: traefik:v3.1
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"       # HTTP (Let's Encrypt + redirect to HTTPS)
+      - "443:443"     # HTTPS
+      - "127.0.0.1:8080:8080"   # Dashboard (localhost only)
+    volumes:
+      - ./traefik/static/traefik.production.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic/middlewares.yml:/etc/traefik/dynamic/middlewares.yml:ro
+      - ./traefik/dynamic/routes.production.yml:/etc/traefik/dynamic/routes.yml:ro
+      - gateway-certs:/etc/traefik/acme
+    environment:
+      DOMAIN: ${DOMAIN}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+    networks:
+      - gateway
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
+    restart: unless-stopped
+    networks:
+      - gateway
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  gateway:
+    driver: bridge
+
+volumes:
+  gateway-certs:
+    driver: local

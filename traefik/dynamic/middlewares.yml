@@ -1,5 +1,5 @@
-# Default Middlewares
-# These are applied globally to all HTTPS traffic and can be overridden per-route
+# Shared Middlewares - Used across all environments
+# Reference these in your routes with @file suffix (e.g., default-security-headers@file)
 
 http:
   middlewares:

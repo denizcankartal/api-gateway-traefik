@@ -1,5 +1,5 @@
-# Traefik Static Configuration
-# This file defines global settings for the API Gateway
+# Traefik Static Configuration - Production
+# HTTPS with Let's Encrypt and automatic HTTP -> HTTPS redirect
 
 global:
   checkNewVersion: false
@@ -8,7 +8,7 @@ global:
 # API and Dashboard
 api:
   dashboard: true
-  insecure: true  # Dashboard on port 8080 (should be bound to localhost in docker-compose)
+  insecure: true  # Dashboard on port 8080 (bind to localhost only in compose)
 
 # Entry points
 entryPoints:
@@ -20,24 +20,20 @@ entryPoints:
           to: websecure
           scheme: https
           permanent: true
+
   websecure:
     address: ":443"
     http:
       tls:
         certResolver: letsencrypt
-      middlewares:
-        - default-security-headers@file
-        - default-compression@file
-        - default-ratelimit@file
 
 # File provider for dynamic configuration
 providers:
   file:
-    directory: /etc/traefik
+    directory: /etc/traefik/dynamic
     watch: true
 
 # Let's Encrypt certificate resolver
-# Will be enabled/disabled based on gateway-config.yml
 certificatesResolvers:
   letsencrypt:
     acme:

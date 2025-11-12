@@ -1,0 +1,19 @@
+# Environment variables (use .env.example as template)
+.env
+
+# Let's Encrypt certificates (managed by Docker volume)
+acme.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

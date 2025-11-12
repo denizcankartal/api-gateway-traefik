@@ -1,0 +1,38 @@
+# Traefik Static Configuration - Local Development
+# HTTP only, no TLS, no Let's Encrypt
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+# API and Dashboard
+api:
+  dashboard: true
+  insecure: true  # Dashboard on port 8080
+
+# Entry points
+entryPoints:
+  web:
+    address: ":80"
+
+# File provider for dynamic configuration
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+# Logging
+log:
+  level: INFO
+  format: json
+
+# Access logs
+accessLog:
+  format: json
+  fields:
+    headers:
+      defaultMode: keep
+
+# Ping endpoint for health checks
+ping:
+  entryPoint: web
