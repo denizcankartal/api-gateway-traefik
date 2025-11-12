@@ -4,7 +4,7 @@
 http:
   routers:
     frontend-router:
-      rule: "Host(`${DOMAIN}`)"
+      rule: "Host(`example.com`)"
       service: frontend-service
       priority: 10
       entryPoints:

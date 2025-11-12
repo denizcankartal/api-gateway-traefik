@@ -3,7 +3,7 @@ API Gateway Docker image providing a single HTTPS entry point for all backend se
 ## Features
 
 - **Automatic TLS** - Let's Encrypt certificates with auto-renewal (production)
-- **Local Development** - HTTP-only mode when `DOMAIN=localhost` (no TLS)
+- **Local Development** - HTTP-only mode (no TLS)
 - **HTTP → HTTPS** - Automatic redirect to secure endpoints 
 - **Rate Limiting** - Default 100 req/s per IP, configurable per-route 
 - **Circuit Breaking** - Protect backends from cascading failures 
@@ -23,7 +23,6 @@ docker compose -f docker-compose.local.yml up -d
 
 # Test the gateway
 curl http://localhost/           # Frontend
-curl http://localhost/api/status/200  # API
 
 # View dashboard
 open http://localhost:8080/dashboard/
@@ -32,23 +31,22 @@ open http://localhost:8080/dashboard/
 ### Production Deployment
 
 ```bash
-# 1. Create .env file
-cp .env.example .env
-nano .env  # Set DOMAIN and LETSENCRYPT_EMAIL
+# Configure your domain
+# Edit traefik/dynamic/routes.production.yml and replace example.com with your domain and also email address in traefik/static/traefik.production.yml
 
-# 2. Point DNS to your server
-# Create A record: example.com -> YOUR_SERVER_IP
+# Point DNS to your server
+# Create A record: yourdomain.com -> YOUR_SERVER_IP
 
-# 3. Configure firewall
+# Configure firewall
 ufw allow 80/tcp
 ufw allow 443/tcp
 ufw enable
 
-# 4. Deploy
+# Deploy
 docker compose -f docker-compose.production.yml up -d
 
-# 5. Verify HTTPS (wait 30-60s for certificate)
-curl https://example.com
+# Verify HTTPS
+curl https://yourdomain.com
 docker compose -f docker-compose.production.yml logs -f api-gateway | grep acme
 ```
 
@@ -96,7 +94,7 @@ Edit [traefik/dynamic/routes.production.yml](traefik/dynamic/routes.production.y
 http:
   routers:
     my-api-router:
-      rule: "Host(`${DOMAIN}`) && PathPrefix(`/myapi`)"
+      rule: "Host(`example.com`) && PathPrefix(`/myapi`)"
       service: my-api-service
       entryPoints:
         - websecure
@@ -237,10 +235,10 @@ docker compose -f docker-compose.production.yml logs api-gateway | grep acme
    ```bash
    dig +short example.com
    ```
-
-3. **Incorrect environment variables**
+3. **Wrong domain in routes file**
    ```bash
-   cat .env
+   grep "Host(" traefik/dynamic/routes.production.yml
+   # Should match your DNS A record
    ```
 
 4. **Cloudflare middleware blocking**
@@ -287,8 +285,8 @@ docker compose -f docker-compose.production.yml up -d
 ## Production Checklist
 
 ### Before Deployment
-- [ ] `.env` configured with domain and email
-- [ ] Customize [traefik/dynamic/routes.yml](traefik/dynamic/routes.yml) for your services
+- [ ] Domain hardcoded in [traefik/dynamic/routes.production.yml](traefik/dynamic/routes.production.yml)
+- [ ] `.env` file created with `LETSENCRYPT_EMAIL` configured
 - [ ] DNS A record pointing to server
 - [ ] Firewall allows ports 80 and 443
 
